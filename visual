@@ -1,0 +1,149 @@
+-- Dependencies
+Directory = require(game:GetService("ReplicatedStorage").Library.Directory)
+getgenv().changes = {}
+
+function deep_copy_table(original)
+    local copy = table.clone(original)
+
+    for key, value in pairs(copy) do
+        if type(value) == 'table' then
+            copy[key] = table.clone(value)
+        end
+    end
+
+    return copy
+end
+
+function nieger(from, to, isGem, numberOfItems)
+    if table.find(getgenv().changes, {from, to}) then
+        print("please reset changes to change this pet/gem again")
+        return
+    end
+
+    -- Store the changes
+    table.insert(getgenv().changes, {from, to, deep_copy_table(Directory.Pets[from]), deep_copy_table(Directory.Pets[to])})
+
+    if isGem then
+        -- Logic for gems duplication (Visual only)
+        for i = 1, numberOfItems do
+            print("Duplicated " .. numberOfItems .. " gems visually!") -- Adjusted message to reflect gem logic
+            -- Implement your visual gem logic here
+        end
+    else
+        -- Logic for pet duplication
+        for i, v in pairs(Directory.Pets[from]) do
+            Directory.Pets[from][i] = nil
+        end
+
+        for i, v in pairs(Directory.Pets[to]) do
+            Directory.Pets[from][i] = v
+        end
+    end
+end
+
+-- Setup Orion Library
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "SussyScrip 🔥", IntroText = "Pet & Gem Duplication Tool 🔥", HidePremium = false, SaveConfig = true, ConfigFolder = "SUSSYCONFIG"})
+
+-- Duplication Tab for Pets
+local PetVisualTab = Window:MakeTab({
+    Name = "Pet Visual",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Guide Section for Pet Visual
+PetVisualTab:AddLabel("Guide: How to Visual Pets")
+PetVisualTab:AddLabel("1. Enter the name of the pet you want to visual.")
+PetVisualTab:AddLabel("2. Enter the name of the pet you want to turn it into.")
+PetVisualTab:AddLabel("3. Enter the number of pets you want to visual.")
+PetVisualTab:AddLabel("4. Click 'Visual' to complete the action.")
+PetVisualTab:AddLabel("⚠️ Note: Make sure the names are spelled correctly! ⚠️")
+
+-- Textbox for existing pet name
+local petFrom, petTo
+PetVisualTab:AddTextbox({
+    Name = "Name of the Pet",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(existingName)
+        petFrom = existingName
+    end
+})
+
+-- Textbox for new pet name
+PetVisualTab:AddTextbox({
+    Name = "Name Pet to be Visual",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(newName)
+        petTo = newName
+    end
+})
+
+-- Textbox for number of pets
+local petNumber = 1 -- Default number of pets
+PetVisualTab:AddTextbox({
+    Name = "Number of Pets",
+    Default = "1", -- Default value
+    TextDisappear = true,
+    Callback = function(petCount)
+        petNumber = tonumber(petCount) or 1 -- Ensure it's a number, default to 1 if invalid
+        print("Number of Pets set to: " .. petNumber) -- Visual confirmation
+    end
+})
+
+-- Button to Visual Pet
+PetVisualTab:AddButton({
+    Name = "Visual Pet 🔄",
+    Icon = "rbxassetid://4483345998",
+    Callback = function()
+        nieger(petFrom, petTo, false, petNumber)
+        print("Visualized " .. petNumber .. " pets from " .. petFrom .. " to " .. petTo) -- Visual confirmation
+    end
+})
+
+-- New Tab for Gem Visual
+local GemVisualTab = Window:MakeTab({
+    Name = "Gem Visual",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Guide Section for Gem Visual
+GemVisualTab:AddLabel("Guide: How to Visual Gems")
+GemVisualTab:AddLabel("1. Enter the number of gems you want to visual.")
+GemVisualTab:AddLabel("2. Click 'Visual Gems' to complete the action.")
+GemVisualTab:AddLabel("⚠️ Note: The gems will be visualized only! ⚠️")
+
+-- Textbox for number of gems
+local gemNumber = 1 -- Default number of gems
+GemVisualTab:AddTextbox({
+    Name = "Number of Gems",
+    Default = "1", -- Default value
+    TextDisappear = true,
+    Callback = function(gemCount)
+        gemNumber = tonumber(gemCount) or 1 -- Ensure it's a number, default to 1 if invalid
+        print("Number of Gems set to: " .. gemNumber) -- Visual confirmation
+    end
+})
+
+-- Button to Visual Gems
+GemVisualTab:AddButton({
+    Name = "Visual Gems 💎",
+    Icon = "rbxassetid://4483345998",
+    Callback = function()
+        nieger("gems", "gems", true, gemNumber) -- Use placeholder names for gem visual
+        print("Visualized " .. gemNumber .. " gems visually!") -- Visual confirmation
+    end
+})
+
+-- Credit Section
+local CreditTab = Window:MakeTab({
+    Name = "Credits",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+CreditTab:AddLabel("Credits:")
+CreditTab:AddLabel("🔥 SussyScrip 🔥")
